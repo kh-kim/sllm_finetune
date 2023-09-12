@@ -58,7 +58,7 @@ def get_now():
 def init_wandb(config):
     wandb.login()
     wandb.init(project="Meeting-Log-Summ", config=vars(config))
-    wandb.run.name = config.model_name + '_' + get_now()
+    wandb.run.name = config.model_name + '_' + get_now()        # Add timestamp to run name, because we want to compare different runs
     wandb.run.save()
 
     return wandb.run.name
@@ -150,6 +150,7 @@ def main(config):
     train_dataset = train_dataset.map(lambda x: tokenizer(x["text"], truncation=True, max_length=config.max_length), batched=True)
     valid_dataset = valid_dataset.map(lambda x: tokenizer(x["text"], truncation=True, max_length=config.max_length), batched=True)
 
+    # Get BitsAndBytesConfig for quantization
     if config.use_8bit:
         q_config = BitsAndBytesConfig(
             load_in_8bit=True,
@@ -158,8 +159,6 @@ def main(config):
     elif config.use_4bit:
         q_config = BitsAndBytesConfig(
             load_in_4bit=True,
-            # bnb_4bit_use_double_quant=True,
-            # bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch.bfloat16
         )
     else:
@@ -167,21 +166,21 @@ def main(config):
 
     model = AutoModelForCausalLM.from_pretrained(
         config.pretrained_model_name,
-        quantization_config=q_config,
-        device_map="auto",
-        trust_remote_code=True,
+        quantization_config=q_config,               # Use quantization, if necessary
+        device_map="auto",                          # Let accelerate distributed model loading
+        trust_remote_code=True,                     # Some models require this option
     )
 
-    model.gradient_checkpointing_enable()
-    model = prepare_model_for_kbit_training(model)
+    model.gradient_checkpointing_enable()           # Enable gradient checkpointing
+    model = prepare_model_for_kbit_training(model)  # Prepare model for k-bit training
 
     l_config = LoraConfig(
-        r=config.lora_r,
-        lora_alpha=config.lora_alpha, 
-        target_modules=["query_key_value"], 
+        r=config.lora_r,                            # Set most important hyperparameters for Lora
+        lora_alpha=config.lora_alpha,
+        target_modules=["query_key_value"],         # Set target modules for Lora application
         lora_dropout=config.lora_dropout,
-        bias="none", 
-        task_type="CAUSAL_LM"
+        bias="none",
+        task_type="CAUSAL_LM",
     )
 
     model = get_peft_model(model, l_config)

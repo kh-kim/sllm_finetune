@@ -28,14 +28,12 @@ class LanguageModelWrapper:
 
         if model_name is not None:
             if use_4bit:
-                self.bnb_config = BitsAndBytesConfig(
+                self.q_config = BitsAndBytesConfig(
                     load_in_4bit=True,
-                    bnb_4bit_use_double_quant=True,
-                    bnb_4bit_quant_type="nf4",
                     bnb_4bit_compute_dtype=torch.bfloat16
                 )
             else: # use 8bit
-                self.bnb_config = BitsAndBytesConfig(
+                self.q_config = BitsAndBytesConfig(
                     load_in_8bit=True,
                     bnb_8bit_compute_dtype=torch.bfloat16
                 )
@@ -44,7 +42,7 @@ class LanguageModelWrapper:
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 device_map="auto",
-                quantization_config=self.bnb_config,
+                quantization_config=self.q_config,
                 trust_remote_code=True,
                 max_memory=max_memory_map,
             )
@@ -125,14 +123,12 @@ class LoRAWrapper(LanguageModelWrapper):
 
         self.plm_config = PeftConfig.from_pretrained(checkpoint_dir_path)
         if use_4bit:
-            self.bnb_config = BitsAndBytesConfig(
+            self.q_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4",
                 bnb_4bit_compute_dtype=torch.bfloat16
             )
         else: # use 8bit
-            self.bnb_config = BitsAndBytesConfig(
+            self.q_config = BitsAndBytesConfig(
                 load_in_8bit=True,
                 bnb_8bit_compute_dtype=torch.bfloat16
             )
@@ -142,7 +138,7 @@ class LoRAWrapper(LanguageModelWrapper):
             AutoModelForCausalLM.from_pretrained(
                 self.plm_config.base_model_name_or_path,
                 device_map="auto",
-                quantization_config=self.bnb_config,
+                quantization_config=self.q_config,
                 trust_remote_code=True,
                 max_memory=max_memory_map,
             ),
