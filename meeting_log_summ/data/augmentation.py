@@ -6,11 +6,6 @@ import re
 
 import openai
 
-api_key_map = {
-    "pointzz.ki@gmail.com": None,
-    "deepcl.limited@gmail.com": None,
-    "nlp.with.deep.learning@gmail.com": None,
-}
 
 PROMPT = \
 """### System
@@ -89,12 +84,12 @@ def read_jsonl(fn):
 if __name__ == "__main__":
     input_fn = sys.argv[1]
     output_fn = sys.argv[2]
-    api_account = sys.argv[3]
+    api_key = sys.argv[3]
     start_index = int(sys.argv[4]) if len(sys.argv) > 5 else -1
     end_index = int(sys.argv[5]) if len(sys.argv) > 5 else -1
     max_fail_cnt = 2
 
-    openai.api_key = api_key_map[api_account]
+    openai.api_key = api_key
 
     n_generation = end_index - start_index if end_index > 0 else 2000
 
