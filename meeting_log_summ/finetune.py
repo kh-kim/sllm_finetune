@@ -36,8 +36,8 @@ def get_config():
     p.add_argument("--min_warmup_steps", type=int, default=1000)
     p.add_argument("--warmup_ratio", type=float, default=0.1)
     p.add_argument("--num_logging_steps_per_epoch", type=int, default=1000)
-    p.add_argument("--num_eval_steps_per_epoch", type=int, default=10)
-    p.add_argument("--num_save_steps_per_epoch", type=int, default=10)
+    p.add_argument("--num_eval_steps_per_epoch", type=int, default=5)
+    p.add_argument("--num_save_steps_per_epoch", type=int, default=5)
 
     p.add_argument("--use_8bit", action="store_true")
     p.add_argument("--use_4bit", action="store_true")
