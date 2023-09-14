@@ -1,4 +1,4 @@
-__pycache__/inference.cpython-310.pyc
+*.pyc
 meeting_log_summ/checkpoints/
 meeting_log_summ/data/*/*.json
 meeting_log_summ/wandb/
